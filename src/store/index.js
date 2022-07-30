@@ -92,7 +92,7 @@ function getStore(config) {
         return getters.getStac(link.href);
       },
 
-      displayCatalogTitle: (state, getters) => STAC.getDisplayTitle(getters.root, state.catalogTitle),
+      displayCatalogTitle: (state, getters) => state.catalogTitle,
 
       isCollection: state => state.data?.isCollection() || false,
       isCatalog: state => state.data?.isCatalog() || false,
@@ -339,12 +339,18 @@ function getStore(config) {
         Vue.set(state, 'stateQueryParameters', createBlankStateQueryParameters());
       },
       queryParameters(state, params) {
-        const appState = state.stateQueryParameters;
-        for (let [key, value] of Object.entries(params.state)) {
-          if (Array.isArray(appState[key]) && !(Array.isArray(value))) {
-            value = value.split(',');
+        for(let key in params) {
+          if (key === 'state') {
+            for (let [key, value] of Object.entries(params.state)) {
+              if (Array.isArray(state.stateQueryParameters[key]) && !(Array.isArray(value))) {
+                value = value.split(',');
+              }
+              Vue.set(state.stateQueryParameters, key, value);
+            }
           }
-          Vue.set(appState, key, value);
+          else {
+            state[`${key}QueryParameters`] = params[key];
+          }
         }
       },
       openCollapsible(state, {type, uid}) {
@@ -378,6 +384,9 @@ function getStore(config) {
         }
       },
       loaded(state, {url, data}) {
+        if (typeof state.preprocessSTAC === 'function') {
+          data = state.preprocessSTAC(data);
+        }
         Vue.set(state.database, url, Object.freeze(data));
       },
       resetCatalog(state) {
@@ -421,6 +430,9 @@ function getStore(config) {
       removeFromQueue(state, num) {
         state.queue.splice(0, num);
       },
+      setApiKey(state, key) {
+        state.privateQueryParameters.key = key;
+      },
       setApiItemsLink(state, link) {
         state.apiItemsLink = link;
       },
@@ -460,7 +472,11 @@ function getStore(config) {
           return;
         }
 
-        let collections = data.collections.map(collection => Object.freeze(collection));
+        let collections = data.collections;
+        if (typeof state.collectionsFilter === 'function') {
+          collections = collections.filter(c => state.collectionsFilter(c));
+        }
+        collections = collections.map(collection => Object.freeze(collection));
         let nextLink = Utils.getLinkWithRel(data.links, 'next');
         if (show) {
           state.nextCollectionsLink = nextLink;
