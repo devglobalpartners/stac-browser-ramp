@@ -4,7 +4,7 @@ import axios from "axios";
 import Utils from '../utils';
 import STAC from '../models/stac';
 import bs58 from 'bs58';
-import { isAuthenticationError, Loading, stacRequest } from './utils';
+import { isAuthenticationError, Loading, processSTAC, stacRequest } from './utils';
 import URI from "urijs";
 import Queryable from '../models/queryable';
 
@@ -410,10 +410,7 @@ function getStore(config) {
         }
       },
       loaded(state, {url, data}) {
-        if (typeof state.preprocessSTAC === 'function') {
-          data = state.preprocessSTAC(data);
-        }
-        Vue.set(state.database, url, Object.freeze(data));
+        Vue.set(state.database, url, processSTAC(state, data));
       },
       resetCatalog(state) {
         Object.assign(state, catalogDefaults());
@@ -469,7 +466,7 @@ function getStore(config) {
         if (!Utils.isObject(data) || !Array.isArray(data.features)) {
           return;
         }
-        let apiItems = data.features.map(feature => Object.freeze(feature));
+        let apiItems = data.features.map(feature => processSTAC(state, feature));
 
         if (show) {
           state.apiItems = apiItems;
@@ -502,7 +499,7 @@ function getStore(config) {
         if (typeof state.collectionsFilter === 'function') {
           collections = collections.filter(c => state.collectionsFilter(c));
         }
-        collections = collections.map(collection => Object.freeze(collection));
+        collections = collections.map(collection => processSTAC(collection));
         let nextLink = Utils.getLinkWithRel(data.links, 'next');
         if (show) {
           state.nextCollectionsLink = nextLink;
