@@ -453,9 +453,6 @@ function getStore(config) {
       removeFromQueue(state, num) {
         state.queue.splice(0, num);
       },
-      setApiKey(state, key) {
-        state.privateQueryParameters.key = key;
-      },
       setApiItemsLink(state, link) {
         state.apiItemsLink = link;
       },
@@ -499,7 +496,7 @@ function getStore(config) {
         if (typeof state.collectionsFilter === 'function') {
           collections = collections.filter(c => state.collectionsFilter(c));
         }
-        collections = collections.map(collection => processSTAC(collection));
+        collections = collections.map(collection => processSTAC(state, collection));
         let nextLink = Utils.getLinkWithRel(data.links, 'next');
         if (show) {
           state.nextCollectionsLink = nextLink;
