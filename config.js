@@ -10,7 +10,7 @@ function preprocess(stac) {
 }
 
 module.exports = {
-    catalogUrl: "https://api.radiant.earth/mlhub/v1/",
+    catalogUrl: "https://api.radiant.earth/mlhub/v1/", // Must have a slash at the end for folders/APIs
     catalogTitle: TITLE,
     allowExternalAccess: false, // Must be true if catalogUrl is not given
     useTileLayerAsFallback: true,
@@ -25,9 +25,15 @@ module.exports = {
     geoTiffResolution: 128,
     redirectLegacyUrls: false,
     itemsPerPage: 12,
+    maxPreviewsOnMap: 50,
     crossOriginMedia: null,
     requestHeaders: {},
     requestQueryParameters: {},
     collectionsFilter: c => c.id.startsWith("sen12floods_"),
-    preprocessSTAC: preprocess
+    preprocessSTAC: preprocess,
+    authConfig: {
+        type: 'query', // null or 'query' or 'header'
+        key: 'key',
+        description: `Please get the API key from your [Radiant MLHub Profile](https://mlhub.earth/profile).`
+    }
 };

@@ -4,7 +4,7 @@ import axios from "axios";
 import Utils from '../utils';
 import STAC from '../models/stac';
 import bs58 from 'bs58';
-import { Loading, stacRequest } from './utils';
+import { isAuthenticationError, Loading, stacRequest } from './utils';
 import URI from "urijs";
 import Queryable from '../models/queryable';
 
@@ -41,6 +41,7 @@ function getStore(config) {
     queue: [],
     redirectUrl: null,
     privateQueryParameters: {},
+    doAuth: [],
 
     apiCollections: [],
     nextCollectionsLink: null
@@ -353,6 +354,31 @@ function getStore(config) {
           }
         }
       },
+      setQueryParameter(state, {type, key, value}) {
+        type = `${type}QueryParameters`;
+        if (typeof value === 'undefined') {
+          delete state[type][key];
+        }
+        else {
+          state[type][key] = value;
+        }
+      },
+      setRequestHeader(state, {key, value}) {
+        if (typeof value === 'undefined') {
+          delete state.requestHeaders[key];
+        }
+        else {
+          state.requestHeaders[key] = value;
+        }
+      },
+      requestAuth(state, callback) {
+        if (typeof callback === 'function') {
+          state.doAuth.push(callback);
+        }
+        else {
+          state.doAuth = [];
+        }
+      },
       openCollapsible(state, {type, uid}) {
         const idx = state.stateQueryParameters[type].indexOf(uid);
         // need to prevent duplicates because of the way the collapse v-model works
@@ -572,7 +598,8 @@ function getStore(config) {
         }
         cx.commit('parents', parents);
       },
-      async load(cx, {url, fromBrowser, show, loadApi}) {
+      async load(cx, args) {
+        let {url, fromBrowser, show, loadApi} = args;
         let path;
         if (fromBrowser) {
           path = url.startsWith('/') ? url : '/' + url;
@@ -610,6 +637,10 @@ function getStore(config) {
               }
             }
           } catch (error) {
+            if (cx.state.authConfig && isAuthenticationError(error)) {
+              cx.commit('requestAuth', () => cx.dispatch('load', args));
+              return;
+            }
             console.error(error);
             cx.commit('errored', {url, error});
 
@@ -623,24 +654,36 @@ function getStore(config) {
         if (loading.loadApi && data instanceof STAC) {
           // Load API Collections
           if (data.getApiCollectionsLink()) {
+            let args = {stac: data, show: loading.show};
             try {
-              await cx.dispatch('loadNextApiCollections', {stac: data, show: loading.show});
+              await cx.dispatch('loadNextApiCollections', args);
             } catch (error) {
-              cx.commit('showGlobalError', {
-                message: 'Sorry, the API Collections could not be loaded.',
-                error
-              });
+              if (cx.state.authConfig && isAuthenticationError(error)) {
+                cx.commit('requestAuth', () => cx.dispatch('loadNextApiCollections', args));
+              }
+              else {
+                cx.commit('showGlobalError', {
+                  message: 'Sorry, the API Collections could not be loaded.',
+                  error
+                });
+              }
             }
           }
           // Load API Items
           if (data.getApiItemsLink()) {
+            let args = {stac: data, show: loading.show};
             try {
-              await cx.dispatch('loadApiItems', {stac: data, show: loading.show});
+              await cx.dispatch('loadApiItems', args);
             } catch (error) {
-              cx.commit('showGlobalError', {
-                message: 'Sorry, the API Items could not be loaded.',
-                error
-              });
+              if (cx.state.authConfig && isAuthenticationError(error)) {
+                cx.commit('requestAuth', () => cx.dispatch('loadApiItems', args));
+              }
+              else {
+                cx.commit('showGlobalError', {
+                  message: 'Sorry, the API Items could not be loaded.',
+                  error
+                });
+              }
             }
           }
         }
@@ -734,21 +777,39 @@ function getStore(config) {
           cx.commit('addApiCollections', { data: response.data, stac, show });
         }
       },
-      async loadQueryables(cx, url) {
+      async loadQueryables(cx, {url, refParser = null}) {
         let schemas;
         try {
           let response = await stacRequest(cx, Utils.toAbsolute('queryables', url));
-          try {
-            const refParser = require('@apidevtools/json-schema-ref-parser');
-            schemas = await refParser.dereference(response.data);
-          } catch (error) {
-            schemas = response.data; // Use data with $refs included as fallback
-            console.error(error);
+          schemas = response.data; // Use data with $refs included as fallback anyway
+          if (refParser) {
+            try {
+              schemas = await refParser.dereference(schemas);
+            } catch (error) {
+              console.error(error);
+            }
           }
         } catch (error) {
           console.log('Queryables not supported by API');
         }
         cx.commit('addQueryables', schemas);
+      },
+      async retryAfterAuth(cx) {
+        let errorFn = error => this.$store.commit('showGlobalError', {
+          error,
+          message: 'The requests errored, the provided authentication details may be incorrect.'
+        });
+
+        for(let callback of cx.state.doAuth) {
+          try {
+            let p = callback();
+            if (p instanceof Promise) {
+              p.catch(errorFn);
+            }
+          } catch (error) {
+            errorFn(error);
+          }
+        }
       },
       async validate(cx, url) {
         if (typeof cx.state.valid === 'boolean') {

@@ -32,25 +32,9 @@ export async function stacRequest(cx, link) {
   else {
     opts = link;
   }
+  return await axios(opts);
+}
 
-  let response;
-  try {
-    response = await axios(opts);
-  } catch (error) {
-    if (error?.response?.status === 401) {
-      let key = prompt('You don\'t have permission to view this page. Please provide your API Key:', '');
-      if (key) {
-        cx.commit('setApiKey', key);
-        response = await stacRequest(cx, link);
-      }
-      else {
-        throw error;
-      }
-    }
-    else {
-      throw error;
-    }
-  }
-
-  return response;
+export function isAuthenticationError(error) {
+  return [401,403].includes(error?.response?.status);
 }

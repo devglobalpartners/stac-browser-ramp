@@ -1,5 +1,6 @@
 <template>
   <b-container id="stac-browser">
+    <Authentication v-if="doAuth.length > 0" />
     <b-sidebar id="sidebar" title="Browse" shadow lazy>
       <Sidebar />
     </b-sidebar>
@@ -30,14 +31,12 @@ import getStore from "./store";
 
 import {
   AlertPlugin, BadgePlugin, ButtonGroupPlugin, ButtonPlugin,
-  CardPlugin, LayoutPlugin, SidebarPlugin, SpinnerPlugin, TablePlugin,
+  CardPlugin, LayoutPlugin, SidebarPlugin, SpinnerPlugin,
   VBToggle, VBVisible } from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
 import Clipboard from 'v-clipboard';
-
-import { Formatters } from '@radiantearth/stac-fields';
 
 import ErrorAlert from './components/ErrorAlert.vue';
 import Sidebar from './components/Sidebar.vue';
@@ -58,19 +57,11 @@ Vue.use(CardPlugin);
 Vue.use(LayoutPlugin);
 Vue.use(SidebarPlugin);
 Vue.use(SpinnerPlugin);
-Vue.use(TablePlugin);
 
 // For collapsibles / accordions
 Vue.directive('b-toggle', VBToggle);
 // Used to detect when a catalog/item becomes visible so that further data can be loaded
 Vue.directive('b-visible', VBVisible);
-
-// Add StacField formatters as filters
-for(let name in Formatters) {
-  if (name.startsWith('format')) {
-    Vue.filter(name.replace(/^format/, ''), Formatters[name]);
-  }
-}
 
 const CONFIG = Object.assign(CONFIG_FILE, CONFIG_CLI);
 
@@ -104,6 +95,7 @@ export default {
   router,
   store: getStore(CONFIG),
   components: {
+    Authentication: () => import('./components/Authentication.vue'),
     ErrorAlert,
     Sidebar,
     StacHeader
@@ -117,7 +109,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['title', 'globalError', 'stateQueryParameters']),
+    ...mapState(['title', 'doAuth', 'globalError', 'stateQueryParameters']),
     ...mapState({catalogUrlFromVueX: 'catalogUrl'}),
     ...mapGetters(['displayCatalogTitle']),
     browserVersion() {
@@ -210,8 +202,8 @@ export default {
         }
         // All other parameters should be appended to the catalog requests
         else {
-          params.catalog = Utils.isObject(params.catalog) ? params.catalog : {};
-          params.catalog[key] = query[key];
+          params.request = Utils.isObject(params.request) ? params.request : {};
+          params.request[key] = query[key];
         }
       }
       if (Utils.size(params) > 0) {
@@ -233,8 +225,10 @@ export default {
         }
       }
 
-      this.$router.replace({ query: this.appStateAsParams }).catch((e) => {
-        console.log('Routing Error', e);
+      this.$router.replace({ query: this.appStateAsParams }).catch(error => {
+        if (!VueRouter.isNavigationFailure(error, VueRouter.NavigationFailureType.duplicated)) {
+          throw Error(error);
+        }
       });
     },
     showError(error, message) {

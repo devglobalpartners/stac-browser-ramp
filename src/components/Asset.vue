@@ -15,7 +15,7 @@
           </b-badge>
           <b-badge v-if="asset.deprecated" variant="warning" class="deprecated ml-1 mb-1">Deprecated</b-badge>
           <b-badge v-for="role in asset.roles" :key="role" :variant="role === 'data' ? 'primary' : 'secondary'" class="role ml-1 mb-1">{{ role }}</b-badge>
-          <b-badge variant="dark" class="format ml-1 mb-1" :title="fileFormat"><span v-html="shortFileFormat" /></b-badge>
+          <b-badge v-if="shortFileFormat" variant="dark" class="format ml-1 mb-1" :title="fileFormat"><span v-html="shortFileFormat" /></b-badge>
         </div>
       </b-button>
     </b-card-header>
@@ -48,7 +48,7 @@
 
 <script>
 import { BCollapse, BIconBoxArrowUpRight, BIconCheck, BIconChevronRight, BIconChevronDown, BIconDownload, BIconEye } from 'bootstrap-vue';
-import { Formatters } from '@radiantearth/stac-fields';
+import { formatMediaType } from '@radiantearth/stac-fields/formatters';
 import { mapGetters, mapState } from 'vuex';
 import Description from './Description.vue';
 import Metadata from './Metadata.vue';
@@ -161,13 +161,13 @@ export default {
     },
     fileFormat() {
       if (typeof this.asset.type === "string" && this.asset.type.length > 0) {
-        return Formatters.formatMediaType(this.asset.type);
+        return formatMediaType(this.asset.type);
       }
       return null;
     },
     shortFileFormat() {
       if (typeof this.asset.type === "string" && this.asset.type.length > 0) {
-        return Formatters.formatMediaType(this.asset.type, null, {shorten: true});
+        return formatMediaType(this.asset.type, null, {shorten: true});
       }
       return null;
     },
