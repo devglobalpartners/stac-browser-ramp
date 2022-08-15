@@ -3,12 +3,6 @@
 // Most of the variables below are Bootstrap variables, see https://getbootstrap.com/docs/4.0/getting-started/theming/ for details.
 // For simplicity we just provide some common options as default, but you can override all Bootstrap Sass variables.
 
-// Header / Logo, either image (see below), text (shows CATALOG_TITLE) or none
-$logo: 'image'; 
-// If 'image' has been chosen above
-$logo-image: 'https://dev.global/wp-content/uploads/2021/12/Standard-Logo-Color.png';
-$logo-image-height: 100px;
-
 // Background and text default colors
 $body-bg: #fefefe;
 $body-color: #5D5D5D;
@@ -17,7 +11,7 @@ $body-color: #5D5D5D;
 $theme-colors: (
   "primary":       #00416A,
   "secondary":     #3FC3DF,
-  "success":       #92C73F,
+  "success":       #4CB748,
   "info":          #0B8BCB,
   "warning":       #ffc107,
   "danger":        #dc3545,

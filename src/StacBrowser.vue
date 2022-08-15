@@ -6,7 +6,14 @@
     </b-sidebar>
     <!-- Header -->
     <header>
-      <div class="logo">{{ catalogTitle }}</div>
+      <section class="logo-container">
+        <a href="https://dev.global" target="_blank">
+          <img class="logo primary" src="https://dev.global/wp-content/uploads/2021/12/Standard-Logo-Color.png" />
+        </a>
+        <a href="https://rampml.global" target="_blank">
+          <img class="logo secondary" src="https://rampml.global/wp-content/uploads/2021/12/Ramp_Green_logo.png" />
+        </a>
+      </section>
       <StacHeader />
     </header>
     <!-- Content (Item / Catalog) -->
