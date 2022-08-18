@@ -29,7 +29,7 @@ module.exports = {
     crossOriginMedia: null,
     requestHeaders: {},
     requestQueryParameters: {},
-    collectionsFilter: c => c.id.startsWith("sen12floods_"),
+    collectionsFilter: c => c.id.startsWith("ramp_"),
     preprocessSTAC: preprocess,
     authConfig: {
         type: 'query', // null or 'query' or 'header'
