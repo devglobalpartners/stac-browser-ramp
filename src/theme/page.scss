@@ -23,13 +23,15 @@ body {
         margin: $block-margin 0;
         
         .lead {
-            color: map-get($theme-colors, "secondary");
+            color: $gray-600;
         }
     }
     .logo-container {
         display: flex;
         justify-content: space-between;
-        margin-bottom: $block-margin * 2;
+        padding-bottom: $block-margin * 1.5;
+        border-bottom: 2px solid #92C73F;
+        margin-bottom: $block-margin * 1.5;
 
         .logo {
             height: 75px;
@@ -66,10 +68,11 @@ body {
         font-weight: 600;
         display: flex;
         align-items: center;
+        color: map-get($theme-colors, "primary");
     }
 
     h2 {
-        color: $gray-600;
+        color: map-get($theme-colors, "primary");
         font-weight: 600;
     }
 

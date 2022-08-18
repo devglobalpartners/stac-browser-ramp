@@ -2,7 +2,7 @@
   <section class="items mb-4">
     <h2>
       <span class="title">Items</span>
-      <b-badge v-if="!api" pill variant="secondary ml-2">{{ items.length }}</b-badge>
+      <b-badge v-if="!api" pill variant="dark ml-2">{{ items.length }}</b-badge>
       <SortButtons v-if="!api" class="ml-4" v-model="sort" />
     </h2>
 

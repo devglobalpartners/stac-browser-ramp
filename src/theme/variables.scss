@@ -10,7 +10,7 @@ $body-color: #5D5D5D;
 // Colors
 $theme-colors: (
   "primary":       #00416A,
-  "secondary":     #3FC3DF,
+  "secondary":     #026933,
   "success":       #4CB748,
   "info":          #0B8BCB,
   "warning":       #ffc107,
@@ -39,10 +39,14 @@ $headings-font-family: graphie, -apple-system, BlinkMacSystemFont, "Segoe UI", "
 // Fonts for code
 $font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
+// Heading sizes
 $h1-font-size: 2.2rem;
 $h2-font-size: 1.6rem;
 $h3-font-size: 1.4rem;
 $h4-font-size: 1.2rem;
+
+// Heading color
+$headings-color: null;
 
 // Links
 $link-color: #92C73F;
