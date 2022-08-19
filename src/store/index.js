@@ -93,7 +93,7 @@ function getStore(config) {
         return getters.getStac(link.href);
       },
 
-      displayCatalogTitle: (state, getters) => state.catalogTitle,
+      displayCatalogTitle: state => state.catalogTitle,
 
       isCollection: state => state.data?.isCollection() || false,
       isCatalog: state => state.data?.isCatalog() || false,
