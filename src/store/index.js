@@ -419,6 +419,9 @@ function getStore(config) {
       loaded(state, {url, data}) {
         Vue.set(state.database, url, processSTAC(state, data));
       },
+      clear(state, url) {
+        Vue.delete(state.database, url);
+      },
       resetCatalog(state) {
         Object.assign(state, catalogDefaults());
       },
@@ -605,6 +608,11 @@ function getStore(config) {
           path = cx.getters.toBrowserPath(url);
         }
 
+        // Load the root catalog data if not available (e.g. after page refresh or external access)
+        if (path !== '/' && cx.state.catalogUrl && !cx.state.database[cx.state.catalogUrl]) {
+          await cx.dispatch("load", { url: cx.state.catalogUrl, loadApi: true });
+        }
+
         if (show) {
           cx.commit('resetPage');
         }
@@ -633,6 +641,7 @@ function getStore(config) {
             }
           } catch (error) {
             if (cx.state.authConfig && isAuthenticationError(error)) {
+              cx.commit('clear', url);
               cx.commit('requestAuth', () => cx.dispatch('load', args));
               return;
             }
@@ -798,7 +807,7 @@ function getStore(config) {
         }
       },
       async retryAfterAuth(cx) {
-        let errorFn = error => this.$store.commit('showGlobalError', {
+        let errorFn = error => cx.commit('showGlobalError', {
           error,
           message: 'The requests errored, the provided authentication details may be incorrect.'
         });
