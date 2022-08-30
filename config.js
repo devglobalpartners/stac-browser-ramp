@@ -30,7 +30,7 @@ module.exports = {
     crossOriginMedia: null,
     requestHeaders: {},
     requestQueryParameters: {},
-    collectionsFilter: c => c.id.startsWith("ramp_"),
+    collectionsFilter: c => c.id.startsWith("ramp_") && !c.id.endsWith('_source'),
     preprocessSTAC: preprocess,
     authConfig: {
         type: 'query', // null or 'query' or 'header'
