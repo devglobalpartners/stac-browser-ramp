@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - dev
+      - master
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,4 +19,4 @@ jobs:
           publish_dir: dist
           exclude_assets: 'report.html'
           user_name: 'STAC Browser CI'
-          user_email: matthias.mohr@radiant.earth
+          user_email: ci@dev.global

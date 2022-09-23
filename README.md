@@ -1,4 +1,4 @@
-# STAC Browser
+# STAC Browser for Ramp
 
 This is a [Spatio-Temporal Asset Catalog (STAC)](https://github.com/radiantearth/stac-spec) browser for static catalogs.
 Minimal support for APIs is implemented, but it not the focus of the Browser and may lead to issues.
