@@ -25,7 +25,7 @@
           <b-card no-body class="maps-preview">
             <b-tabs v-model="tab" ref="tabs" pills card vertical end>
               <b-tab v-if="isCollection" title="Map" no-body>
-                <Map :stac="data" :stacLayerData="catalogAsFc" @mapClicked="mapClicked" @dataChanged="dataChanged" />
+                <Map :stac="data" :stacLayerData="catalogAsFc" @mapClicked="mapClicked" @dataChanged="dataChanged" popover />
               </b-tab>
               <b-tab v-if="thumbnails.length > 0" title="Preview" no-body>
                 <Thumbnails :thumbnails="thumbnails" />
@@ -120,8 +120,11 @@ export default {
     };
   },
   computed: {
-    ...mapState(['data', 'url', 'apiItems', 'apiItemsLink', 'apiItemsPagination', 'apiItemsFilter', 'apiItemsLoading']),
-    ...mapGetters(['additionalLinks', 'catalogs', 'isCollection', 'items', 'hasMoreCollections']),
+    ...mapState(['data', 'url', 'apiItems', 'apiItemsLink', 'apiItemsPagination', 'apiItemsFilter']),
+    ...mapGetters(['additionalLinks', 'catalogs', 'isCollection', 'items', 'hasMoreCollections', 'getApiItemsLoading']),
+    apiItemsLoading() {
+      return this.getApiItemsLoading(this.data);
+    },
     licenses() {
       if (this.isCollection && this.data.license) {
         return formatLicense(this.data.license, null, null, this.data);

@@ -15,8 +15,6 @@
 </template>
 
 <script>
-import Utils from '../utils';
-
 export default {
 	name: 'DeprecationNotice',
 	components: {
@@ -30,13 +28,14 @@ export default {
 	},
 	computed: {
 		latestLink() {
-			return this.getLink('latest-version');
+			return this.data.getStacLinkWithRel('latest-version');
 		},
 		successorLink() {
-			return this.getLink('successor-version');
+			return this.data.getStacLinkWithRel('successor-version');
 		},
 		predecessorLink() {
-			return !this.isDeprecated && this.getLink('predecessor-version'); // Show prev. link only if not deprecated
+			// Show prev. link only if not deprecated
+			return !this.isDeprecated && this.data.getStacLinkWithRel('predecessor-version');
 		},
 		variant() {
 			return this.isDeprecated ? 'warning' : 'info';
@@ -63,18 +62,7 @@ export default {
 				return this.data.type;
 			}
 		}
-	},
-  methods: {
-    getLink(rel) {
-      let links = this.data.getLinksWithRels(rel).filter(link => Utils.isStacMediaType(link.type, true));
-			if (links.length > 0) {
-				return links[0];
-			}
-			else {
-				return null;
-			}
-    }
-  }
+	}
 };
 </script>
 

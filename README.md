@@ -8,7 +8,10 @@ implemented as a single page application (SPA) for ease of development and to
 limit the overall number of catalog reads necessary when browsing (as catalogs
 may be nested and do not necessarily contain references to their parents).
 
-Version: **3.0.0-beta.3** (supports all STAC versions between 0.6.0 and 1.0.0)
+Version: **3.0.0-beta.4** (supports all STAC versions between 0.6.0 and 1.0.0)
+
+It's not officially supported, but you may also be able to use it for
+certain *OGC API - Records* and *OGC API - Features* compliant servers.
 
 ## Examples
 
@@ -120,7 +123,7 @@ by using stacProxyUrl you can proxy the original STAC server with one that enabl
 
 ### tileSourceTemplate
 
-The `tileSourceTemplate` variable controls the tile layer that is used to render COGs.
+The `tileSourceTemplate` variable controls the tile layer that is used to render imagery such as (cloud-optimized) GeoTiffs.
 
 The format of this value is a tile layer template with an optional `{url}` that will be replaced with the COG asset href. For example,
 using a local version of [titiler](https://github.com/developmentseed/titiler) to serve local COG files would look something like:
@@ -128,6 +131,8 @@ using a local version of [titiler](https://github.com/developmentseed/titiler) t
 ```bash
 npm start -- --open --tileSourceTemplate="http://localhost:8000/cog/tiles/{z}/{x}/{y}?url={url}"
 ```
+
+If the option `useTileLayerAsFallback` is set to `true`, the tile server is only used as a fallback.
 
 ### buildTileUrlTemplate
 
@@ -138,12 +143,25 @@ This option replaces the v2 option `tileProxyUrl`.
 
 Please note that this option can only be provided through a config file and is not available via CLI.
 
+If the option `useTileLayerAsFallback` is set to `true`, the tile server is only used as a fallback.
+
 ### useTileLayerAsFallback
 
-If either `tileSourceTemplate` or `buildTileUrlTemplate` are given server-side rendering of COGs is enabled. 
+Depending on this option, either client-side or server-side rendering of imagery such as (cloud-optimized) GeoTiffs can be enabled/disabled.
+
+If either `tileSourceTemplate` or `buildTileUrlTemplate` are given server-side rendering of GeoTiffs is enabled. 
 If server-side rendering should only be used as a fallback for client-side rendering, enable the boolean `useTileLayerAsFallback` option.
 
-By default, client-side COG rendering is enabled. A server-side fallback is provided via the [tiles.rdnt.io](https://github.com/radiantearth/tiles.rdnt.io) project, which serves publicly accessible COGs as tile layers.
+To clarify the behavior, please have a look at the following table:
+
+| `useTileLayerAsFallback` | `tileSourceTemplate` / `buildTileUrlTemplate` | primary imagery renderer | fallback  imagery renderer |
+| ----- | ---------------------- | ----------- | ----------- |
+| true  | one of them configured | client-side | tile-server |
+| false | one of them configured | tile-server | none        |
+| true  | none configured        | client-side | none        |
+| false | none configured        | none        | none        |
+
+By default, client-side rendering is enabled. A server-side fallback is provided via the [tiles.rdnt.io](https://github.com/radiantearth/tiles.rdnt.io) project, which serves publicly accessible GeoTiffs as tile layers.
 
 ### displayGeoTiffByDefault
 
@@ -182,7 +200,7 @@ The value for the [`crossorigin` attribute](https://developer.mozilla.org/en-US/
 
 The headers given in this option are added to all requests that are sent to the selected STAC catalog or API.
 
-Example: `{'Authentication': 'Bearer 134567984623223'}` adds a Bearer token to the HTTP headers.
+Example: `{'Authorization': 'Bearer 134567984623223'}` adds a Bearer token to the HTTP headers.
 
 Please note that this option can only be provided through a config file and is not available via CLI.
 
@@ -205,28 +223,28 @@ It is disabled by default (`null`). If enabled, the token provided by the user c
 
 There are four options you can set in the `authConfig` object:
 
-* `type` (string): Either `query` (use token in query parameters) or `header` (use token in HTTP request headers).
+* `type` (string): `null` (disabled), `query` (use token in query parameters), or `header` (use token in HTTP request headers).
 * `key` (string): The query string parameter name or the HTTP header name respecively.
 * `formatter` (function|null): You can optionally specify a formatter for the query string value or HTTP header value respectively. If not given, the token is provided as provided by the user.
 * `description` (string|null): Optionally a description that is shown to the user. This should explain how the token can be obtained for example. CommonMark is allowed.
 
 Please note that this option can only be provided through a config file and is not available via CLI.
 
-#### Example 1: Bearer Token in the HTTP header
+#### Example 1: HTTP Request Header Value
 
 ```js
 {
-  type: 'header', // null or 'query' or 'header'
-  key: 'Authentication',
+  type: 'header',
+  key: 'Authorization',
   formatter: token => `Bearer ${token}`,
   description: `Please retrieve the token from our [API console](https://example.com/api-console).\n\nFor further questions contact <mailto:support@example.com>.`
 }
 ```
 
 For a given token `123` this results in the following additional HTTP Header:
-`Authentication: Bearer 123`
+`Authorization: Bearer 123`
 
-#### Example 2: Bearer Token in the HTTP header
+#### Example 2: Query Parameter Value
 
 ```js
 {
@@ -295,6 +313,17 @@ So for example if your API requires to pass a token via the `API_KEY` query para
 
 Please note: If the server hosting STAC Browser should not get aware of private query parameters and you are having `historyMode` set to `history`, you can also append the private query parameters to the hash so that it doesn't get transmitted to the server hosting STAC Browser. 
 In this case use for example `https://examples.com/stac-browser/#?~API_KEY=123` instead of `https://examples.com/stac-browser/?~API_KEY=123`.
+
+## Running Dockerfile
+
+When building the Dockerfile, you can add the [`catalogUrl`](#catalogurl) 
+as a [build argument](https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg). For example:
+
+```
+docker build -t stac-browser:v1 --build-arg catalogURL=https://planetarycomputer.microsoft.com/api/stac/v1/ .
+```
+
+If more arguments need to be passed to `npm run build`, you can add them to the Dockerfile as needed.
 
 ## Contributing
 

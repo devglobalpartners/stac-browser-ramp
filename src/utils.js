@@ -36,6 +36,12 @@ export const browserProtocols = [
 export const imageMediaTypes = browserImageTypes.concat(geotiffMediaTypes);
 export const mapMediaTypes = imageMediaTypes.concat([geojsonMediaType]);
 
+export class BrowserError extends Error {
+  constructor(message) {
+	super(message);
+  }
+}
+
 /**
  * General utilities
  * 
@@ -116,24 +122,26 @@ export default class Utils {
 		let uri = URI(href);
 		if (uri.is("relative") && !Utils.isGdalVfsUri(href)) { // Don't convert GDAL VFS URIs: https://github.com/radiantearth/stac-browser/issues/116
 			// Avoid that baseUrls that have a . in the last parth part will be removed (e.g. https://example.com/api/v1.0 )
-			if (!baseUrl.endsWith('/') && !baseUrl.endsWith('.json')) {
-				baseUrl += '/';
+			let baseUri = URI(baseUrl);
+			let baseUriPath = baseUri.path();
+			if (!baseUriPath.endsWith('/') && !baseUriPath.endsWith('.json')) {
+				baseUri.path(baseUriPath + '/');
 			}
-			uri = uri.absoluteTo(baseUrl);
+			uri = uri.absoluteTo(baseUri);
 		}
 		return stringify ? uri.toString() : uri;
 	}
 
 	static getLinkWithRel(links, rel) {
-		return Array.isArray(links) ? links.find(link => Utils.isObject(link) && typeof link.href === 'string' && link.rel === rel) : null;
+		return Array.isArray(links) ? links.find(link => Utils.isObject(link) && Utils.hasText(link.href) && link.rel === rel) : null;
 	}
 
 	static getLinksWithRels(links, rels) {
-			return Array.isArray(links) ? links.filter(link => Utils.isObject(link) && typeof link.href === 'string' && rels.includes(link.rel)) : [];
+			return Array.isArray(links) ? links.filter(link => Utils.isObject(link) && Utils.hasText(link.href) && rels.includes(link.rel)) : [];
 	}
 
 	static getLinksWithOtherRels(links, rels) {
-			return Array.isArray(links) ? links.filter(link => Utils.isObject(link) && typeof link.href === 'string' && !rels.includes(link.rel)) : [];
+			return Array.isArray(links) ? links.filter(link => Utils.isObject(link) && Utils.hasText(link.href) && !rels.includes(link.rel)) : [];
 	}
 
 	static equalUrl(a, b) {
@@ -342,6 +350,10 @@ export default class Utils {
 		// Search with "and" or "or"
 		let fn = and ? 'every' : 'some';
 		return searchterm[fn](term => target.includes(term));
-}
+	}
+
+	static createLink(href, rel) {
+		return {href, rel};
+	}
 
 }
