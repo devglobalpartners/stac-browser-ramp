@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunk_devglobalpartners_stac_browser_ramp"]=self["webpackChunk_devglobalpartners_stac_browser_ramp"]||[]).push([[596],{4596:function(r,n,e){e.r(n),e.d(n,{default:function(){return u}});var a=function(){var r=this,n=r._self._c;return n("b-alert",{attrs:{variant:"warning",show:""}},[n("strong",[r._v("Anonymized")]),r._v("  "),n("small",[r._v(r._s(r.warning))])])},t=[],s={name:"AnonymizedNotice",props:{warning:{type:String,required:!0}}},l=s,i=e(1001),o=(0,i.Z)(l,a,t,!1,null,null,null),u=o.exports}}]);
+//# sourceMappingURL=596.d87db8ea.js.map
