@@ -10,8 +10,6 @@ may be nested and do not necessarily contain references to their parents).
 
 Version: **3.0.0-beta.3** (supports all STAC versions between 0.6.0 and 1.0.0)
 
-This package has also been published to npm as [`@radiantearth/stac-browser`](https://www.npmjs.com/package/@radiantearth/stac-browser).
-
 ## Examples
 
 For a list of examples, check out [STAC Index](https://stacindex.org).
