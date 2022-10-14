@@ -1,6 +1,6 @@
 {
-  "name": "@radiantearth/stac-browser",
-  "version": "3.0.0-beta.3",
+  "name": "@devglobalpartners/stac-browser-ramp",
+  "version": "3.0.0-beta.4",
   "description": "A Vue-based STAC browser intended for static + dynamic deployment",
   "main": "src/main.js",
   "scripts": {
@@ -8,12 +8,9 @@
     "build": "vue-cli-service build --report",
     "lint": "vue-cli-service lint"
   },
-  "bugs": {
-    "url": "https://github.com/radiantearth/stac-browser/issues"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/radiantearth/stac-browser.git"
+    "url": "https://github.com/devglobalpartners/stac-browser.git"
   },
   "author": "Radiant Earth Foundation <hello@radiant.earth>",
   "contributors": [
